@@ -1,0 +1,357 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2020-12-24 09:53:02
+ * @LastEditors: songyzh
+ * @LastEditTime: 2020-12-24 17:14:41
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>gobang</title>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #board {
+        width: 500px;
+        height: 500px;
+        margin: auto;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      #logic-board {
+        position: absolute;
+        top: -15px;
+        left: -15px;
+      }
+      #ui-board {
+        position: absolute;
+        border: 1px solid #d0d0d0;
+      }
+
+      .ui-cell,
+      .cell {
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+        line-height: 30px;
+        vertical-align: middle;
+        text-align: center;
+        border: 1px solid #d0d0d0;
+        background-color: #eee;
+      }
+      .cell {
+        background-color: rgba(0, 0, 0, 0);
+        border: 1px solid rgba(0, 0, 0, 0);
+      }
+
+      .white_chessmen {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: radial-gradient(15px 15px at 15px 15px, #fff, #e2e2e2);
+        margin: 5px;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      .black_chessmen {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: radial-gradient(10px 10px at 15px 15px, #fff, #333);
+        margin: 5px;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="board">
+      <div id="ui-board"></div>
+      <div id="logic-board"></div>
+    </div>
+    <script>
+      let pattern = new Array(225).fill(0);
+      let color = 1;
+      function initUIBoard() {
+        let board = document.getElementById("ui-board");
+        for (let i = 0; i < 14; i++) {
+          for (let j = 0; j < 14; j++) {
+            let cell = document.createElement("div");
+            cell.classList.add("ui-cell");
+            board.appendChild(cell);
+          }
+          board.appendChild(document.createElement("br"));
+        }
+      }
+      function show() {
+        let board = document.getElementById("logic-board");
+        board.innerHTML = "";
+        for (let i = 0; i < 15; i++) {
+          for (let j = 0; j < 15; j++) {
+            let cell = document.createElement("div");
+            cell.classList.add("cell");
+            // 棋子渲染
+            let chessmenClass =
+              pattern[i * 15 + j] === 2
+                ? "white_chessmen"
+                : pattern[i * 15 + j] === 1
+                ? "black_chessmen"
+                : "";
+            if (chessmenClass) {
+              let chessmen = document.createElement("div");
+              chessmen.classList.add(chessmenClass);
+              cell.appendChild(chessmen);
+            }
+            cell.addEventListener("click", () => {
+              if (pattern[i * 15 + j] !== 0) {
+                //落子处不可再次落子
+                return;
+              }
+              userMove(j, i);
+            });
+            board.appendChild(cell);
+          }
+          board.appendChild(document.createElement("br"));
+        }
+      }
+      function userMove(x, y) {
+        pattern[y * 15 + x] = color;
+        if (check(pattern, color)) {
+          let winner = color === 1 ? "black" : "white";
+          show();
+          setTimeout(() => {
+            alert(`${winner} is winner`);
+          }, 0);
+          return;
+        }
+        color = 3 - color;
+        show();
+        computerMove();
+      }
+      function computerMove() {
+        let deep = 0;
+        let choice = bestChoice(pattern, color, deep);
+        if (choice.point) {
+          let index = choice.point[1] * 15 + choice.point[0];
+          pattern[index] = color;
+        }
+        if (check(pattern, color)) {
+          let winner = color === 1 ? "black" : "white";
+          show();
+          setTimeout(() => {
+            alert(`${winner} is winner`);
+            reset();
+          }, 0);
+          return;
+        } else if (isDraw()) {
+          show();
+          setTimeout(() => {
+            alert(`The result is draw`);
+            reset();
+          }, 0);
+          return;
+        }
+        color = 3 - color;
+        show();
+      }
+      // 判断胜负
+      function check(pattern, color) {
+        // 行
+        for (let i = 0; i < 15; i++) {
+          for (let j = 0; j < 15; j++) {
+            let x = j;
+            let y = i;
+            if (pattern[y * 15 + x] === color) {
+              {
+                // 行
+                let win = false;
+                let prev = 1;
+                let forword = 1;
+
+                while (x - prev > -1 && pattern[y * 15 + x - prev] === color) {
+                  prev++;
+                }
+                prev--;
+                while (
+                  x + forword < 15 &&
+                  pattern[y * 15 + x + forword] === color
+                ) {
+                  forword++;
+                }
+                forword--;
+                if (prev + forword == 4) {
+                  win = true;
+                }
+                if (win) {
+                  return true;
+                }
+              }
+              // 列
+              {
+                let win = false;
+                let up = 1;
+                let down = 1;
+                while (y - up > -1 && pattern[(y - up) * 15 + x] === color) {
+                  up++;
+                }
+                up--;
+                while (
+                  y + down < 15 &&
+                  pattern[(y + down) * 15 + x] === color
+                ) {
+                  down++;
+                }
+                down--;
+                if (down + up == 4) {
+                  win = true;
+                }
+                if (win) {
+                  return true;
+                }
+              }
+
+              // 正对角线
+              {
+                let win = false;
+                let topLeftStep = 1;
+                let bottomRightStep = 1;
+                while (
+                  y - topLeftStep > -1 &&
+                  x - topLeftStep > -1 &&
+                  pattern[(y - topLeftStep) * 15 + x - topLeftStep] === color
+                ) {
+                  topLeftStep++;
+                }
+                topLeftStep--;
+                while (
+                  y + bottomRightStep < 15 &&
+                  x + bottomRightStep < 15 &&
+                  pattern[(y + bottomRightStep) * 15 + x + bottomRightStep] ===
+                    color
+                ) {
+                  bottomRightStep++;
+                }
+                bottomRightStep--;
+                if (bottomRightStep + topLeftStep == 4) {
+                  win = true;
+                }
+                if (win) {
+                  return true;
+                }
+              }
+
+              // 反向对角线
+              {
+                let win = false;
+                let topRightStep = 1;
+                let bottomLeftStep = 1;
+                while (
+                  y - topRightStep > -1 &&
+                  x + topRightStep < 15 &&
+                  pattern[(y - topRightStep) * 15 + x + topRightStep] === color
+                ) {
+                  topRightStep++;
+                }
+                topRightStep--;
+                while (
+                  y + bottomLeftStep < 15 &&
+                  x - bottomLeftStep > -1 &&
+                  pattern[(y + bottomLeftStep) * 15 + x - bottomLeftStep] ===
+                    color
+                ) {
+                  bottomLeftStep++;
+                }
+                bottomLeftStep--;
+                if (topRightStep + bottomLeftStep == 4) {
+                  win = true;
+                }
+                if (win) {
+                  return true;
+                }
+              }
+            }
+          }
+        }
+
+        return false;
+      }
+
+      function willwin(pattern, color) {
+        for (let i = 0; i < 15; i++) {
+          for (let j = 0; j < 15; j++) {
+            if (pattern[i * 15 + j]) {
+              continue;
+            }
+            let temp = clone(pattern);
+            temp[i * 15 + j] = color;
+            if (check(temp, color)) {
+              return [j, i];
+            }
+          }
+        }
+        return null;
+      }
+
+      function bestChoice(pattern, color, deep) {
+        debugger;
+        let point = willwin(pattern, color);
+        if (point) {
+          return {
+            point: point,
+            result: 1,
+          };
+        }
+        let result = -1;
+
+        outer: for (let i = 0; i < 15; i++) {
+          for (let j = 0; j < 15; j++) {
+            if (pattern[i * 15 + j] !== 0) {
+              continue;
+            }
+            let temp = clone(pattern);
+            temp[i * 15 + j] = color;
+            deep++;
+            // 我方落子后搜索对方的最优选择结果
+            let opp = bestChoice(temp, 3 - color);
+            // -r 表示我方最优解
+            if (-opp.result >= result) {
+              point = [j, i];
+              result = -opp.result;
+            }
+            if (result === 1) {
+              break outer;
+            } else if (result == -1) {
+              point = opp.point;
+              break outer;
+            }
+          }
+        }
+
+        return {
+          point: point,
+          result: point ? result : 0,
+        };
+      }
+      function clone(pattern) {
+        return [...pattern];
+      }
+      function reset() {
+        pattern = new Array(225).fill(0);
+        let color = 1;
+        show();
+      }
+      function isDraw() {
+        return !pattern.some((item) => item === 0);
+      }
+      initUIBoard();
+      show();
+    </script>
+  </body>
+</html>
