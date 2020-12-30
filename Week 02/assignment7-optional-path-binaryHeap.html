@@ -2,7 +2,7 @@
  * @Author: songyzh
  * @Date: 2020-12-30 13:56:53
  * @LastEditors: songyzh
- * @LastEditTime: 2020-12-30 14:00:33
+ * @LastEditTime: 2020-12-30 16:14:16
 -->
 
 <!DOCTYPE html>
@@ -182,9 +182,16 @@
             return;
           }
 
-          // todo 最优路径优化
-          let finded;
-          if (table[100 * y + x]) {
+          // todo 最优路径优化（有bug 路径前置点有问题）
+          let visited = table[100 * y + x];
+          if (visited) {
+            if (Array.isArray(visited)) {
+              // 判断最优前置点
+              if (distance(visited) - distance(pre) > 0) {
+                table[100 * y + x] = pre; // 修改前置点
+              }
+            }
+
             return;
           }
 
@@ -200,6 +207,8 @@
             while (x != start[0] || y != start[1]) {
               path.push([x, y]);
               [x, y] = table[y * 100 + x];
+              await sleep(30);
+              container.children[100 * y + x].style.backgroundColor = "#d15704";
             }
             return path;
           }
@@ -247,14 +256,14 @@
 
       document.getElementById("find").addEventListener("click", async () => {
         let route = await findPath(map, start, end);
-        if (route) {
-          route.reverse();
-          for (let i = 0; i < route.length; i++) {
-            let [x, y] = route[i];
-            await sleep(30);
-            container.children[100 * y + x].style.backgroundColor = "#d15704";
-          }
-        }
+        // if (route) {
+        //   route.reverse();
+        //   for (let i = 0; i < route.length; i++) {
+        //     let [x, y] = route[i];
+        //     await sleep(30);
+        //     container.children[100 * y + x].style.backgroundColor = "#d15704";
+        //   }
+        // }
       });
       renderMap();
     </script>
