@@ -2,7 +2,7 @@
  * @Author: songyzh
  * @Date: 2020-12-21 15:39:08
  * @LastEditors: songyzh
- * @LastEditTime: 2020-12-22 15:29:40
+ * @LastEditTime: 2020-12-30 10:10:01
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -126,6 +126,7 @@
           for (let j = 0; j < 3; j++) {
             if (pattern[i * 3 + j] !== color) {
               win = false;
+              break;
             }
           }
           if (win) {
@@ -138,6 +139,7 @@
           for (let j = 0; j < 3; j++) {
             if (pattern[i + j * 3] !== color) {
               win = false;
+              break;
             }
           }
           if (win) {
@@ -150,6 +152,7 @@
           for (let i = 0; i < 3; i++) {
             if (pattern[i * 3 + i] !== color) {
               return false;
+              break;
             }
           }
           if (win) {
