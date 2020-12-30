@@ -1,0 +1,262 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2020-12-30 13:56:53
+ * @LastEditors: songyzh
+ * @LastEditTime: 2020-12-30 14:00:33
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>path</title>
+    <style>
+      .cell {
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        background: #e2e2e2;
+        border-right: 1px solid #fff;
+        border-bottom: 1px solid #fff;
+      }
+      .black {
+        background: black;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #container {
+        width: 601px;
+        font-size: 0;
+        text-align: center;
+        margin: 0 auto;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <button id="save">Save Map</button>
+    <button id="reset">Reset Map</button>
+    <button id="find">Find Path</button>
+    <script>
+      let map = localStorage.getItem("map")
+        ? JSON.parse(localStorage.getItem("map"))
+        : Array(10000).fill(0);
+
+      let container = document.getElementById("container");
+
+      let start = [0, 0];
+      let end = [50, 50];
+
+      const GETPARENT = Symbol("get parent");
+      const GETLEFTCHILD = Symbol("get left child");
+      const GETRIGHTCHILD = Symbol("get right child");
+      const CHECKDOWN = Symbol("check down");
+      const CHECKUP = Symbol("check up");
+      const SWAP = Symbol("swap");
+
+      class binaryHeap {
+        constructor(array, compare) {
+          this.compare = compare ? compare : (a, b) => a - b;
+          this.array = array && Array.isArray(array) ? array : [];
+        }
+        pop() {
+          if (this.length <= 0) {
+            console.log("heap is empty.");
+            return null;
+          }
+          if (this.length == 1) {
+            return this.array[0];
+          }
+          let root = this.array[0];
+          this[SWAP](0, this.length - 1);
+          this.array.pop();
+          this[CHECKDOWN](0);
+          return root;
+        }
+        push(data) {
+          this.array.push(data);
+          this[CHECKUP](this.length - 1);
+        }
+        buildHeap() {}
+        get length() {
+          return this.array.length;
+        }
+        // 下滤操作
+        [CHECKDOWN](index) {
+          if (index > this.length - 1) {
+            return;
+          }
+          let smallIndex = index;
+          let leftChildIndex = 2 * index + 1;
+          let rightChildIndex = 2 * index + 2;
+
+          if (leftChildIndex < this.length) {
+            let leftChild = this[GETLEFTCHILD](index);
+            if (this.compare(leftChild, this.array[smallIndex]) < 0) {
+              smallIndex = leftChildIndex;
+            }
+          }
+
+          if (rightChildIndex < this.length) {
+            let rightChild = this[GETRIGHTCHILD](index);
+            if (this.compare(rightChild, this.array[smallIndex]) < 0) {
+              smallIndex = rightChildIndex;
+            }
+          }
+
+          if (smallIndex !== index) {
+            this[SWAP](index, smallIndex);
+            this[CHECKDOWN](smallIndex);
+          }
+        }
+        // 上滤操作
+        [CHECKUP](index) {
+          if (index === 0) {
+            return;
+          }
+          let current = this.array[index];
+          let parent = this[GETPARENT](index);
+          let parentIndex = Math.floor((index - 1) / 2);
+          if (this.compare(current, parent) < 0) {
+            this[SWAP](index, parentIndex);
+            this[CHECKUP](parentIndex);
+          }
+        }
+        [SWAP](i, j) {
+          [this.array[i], this.array[j]] = [this.array[j], this.array[i]];
+        }
+        [GETPARENT](index) {
+          return this.array[Math.floor((index - 1) / 2)] || null;
+        }
+        [GETLEFTCHILD](index) {
+          return this.array[2 * index + 1] || null;
+        }
+        [GETRIGHTCHILD](index) {
+          return this.array[2 * index + 2] || null;
+        }
+      }
+
+      function renderMap() {
+        container.innerHTML = "";
+        for (let y = 0; y < 100; y++) {
+          for (let x = 0; x < 100; x++) {
+            let cell = document.createElement("div");
+            cell.classList.add("cell");
+
+            if (map[y * 100 + x] === 1) {
+              cell.classList.add("black");
+            }
+            cell.addEventListener("mousemove", () => {
+              if (mousedown) {
+                if (clear) {
+                  cell.classList.remove("black");
+                  map[y * 100 + x] = 0;
+                } else {
+                  cell.classList.add("black");
+                  map[y * 100 + x] = 1;
+                }
+              }
+            });
+            container.appendChild(cell);
+          }
+        }
+      }
+
+      async function findPath(map, start, end) {
+        let table = Object.create(map); // 用来存储最终路径
+        // 广度优先
+
+        let heap = new binaryHeap([start], (a, b) => distance(a) - distance(b));
+        async function insert(x, y, pre) {
+          if (x < 0 || x >= 100 || y < 0 || y >= 100) {
+            // 边界
+            return;
+          }
+
+          // todo 最优路径优化
+          let finded;
+          if (table[100 * y + x]) {
+            return;
+          }
+
+          await sleep(1);
+          container.children[100 * y + x].style.backgroundColor = "#28a745";
+          table[100 * y + x] = pre; //已搜索标记
+          heap.push([x, y]);
+        }
+        while (heap.length) {
+          let [x, y] = heap.pop();
+          if (x === end[0] && y === end[1]) {
+            let path = [];
+            while (x != start[0] || y != start[1]) {
+              path.push([x, y]);
+              [x, y] = table[y * 100 + x];
+            }
+            return path;
+          }
+          await insert(x - 1, y, [x, y]);
+          await insert(x + 1, y, [x, y]);
+          await insert(x, y - 1, [x, y]);
+          await insert(x, y + 1, [x, y]);
+
+          await insert(x - 1, y - 1, [x, y]);
+          await insert(x + 1, y + 1, [x, y]);
+          await insert(x + 1, y - 1, [x, y]);
+          await insert(x - 1, y + 1, [x, y]);
+        }
+        return null;
+      }
+
+      function sleep(duration) {
+        return new Promise((resolve, reject) => {
+          setTimeout(resolve, duration);
+        });
+      }
+
+      function distance(point) {
+        return (point[0] - end[0]) ** 2 + (point[1] - end[1]) ** 2;
+      }
+      let mousedown = false;
+      let clear = false;
+      document.addEventListener("mousedown", (e) => {
+        mousedown = true;
+        clear = e.which === 3;
+      });
+
+      document.addEventListener("mouseup", () => (mousedown = false));
+
+      document.addEventListener("contextmenu", (e) => e.preventDefault());
+      document.getElementById("save").addEventListener("click", (e) => {
+        localStorage.setItem("map", JSON.stringify(map));
+      });
+      document.getElementById("reset").addEventListener("click", (e) => {
+        localStorage.clear();
+        map = Array(10000).fill(0);
+        localStorage.setItem("map", JSON.stringify(map));
+        renderMap();
+      });
+
+      document.getElementById("find").addEventListener("click", async () => {
+        let route = await findPath(map, start, end);
+        if (route) {
+          route.reverse();
+          for (let i = 0; i < route.length; i++) {
+            let [x, y] = route[i];
+            await sleep(30);
+            container.children[100 * y + x].style.backgroundColor = "#d15704";
+          }
+        }
+      });
+      renderMap();
+    </script>
+  </body>
+</html>
