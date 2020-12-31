@@ -2,7 +2,7 @@
  * @Author: songyzh
  * @Date: 2020-12-30 13:56:53
  * @LastEditors: songyzh
- * @LastEditTime: 2020-12-31 17:36:25
+ * @LastEditTime: 2020-12-31 17:52:03
 -->
 
 <!DOCTYPE html>
@@ -217,6 +217,8 @@
     <script>
       let visitedNodes = [];
       let cost;
+
+      // 寻路
       async function findPath(map, start, end) {
         let startNode = new Node(start);
         let heap = new binaryHeap([startNode], compare);
@@ -239,6 +241,8 @@
         }
         return null;
       }
+
+      // 检查是否到达终点，并生成路径坐标
       async function check(current) {
         let path = [];
         if (current.row === end[0] && current.col === end[1]) {
@@ -269,26 +273,29 @@
           //遇墙
           return;
         }
-        if (neighbour.col == 50 && neighbour.row == 51) {
-          debugger;
-        }
-        let tempG = 0;
-        let tempH = 0;
-        let tempF;
+
+        let tempG = 0; // 路径步长
+        let tempH = 0; // 当前点到终点距离
+        let tempF; // 以上两者之和判断是否最优路径
+
+        // 若经过当前相邻点的总步长
         if (neighbour.row != current.row && neighbour.col != current.col) {
           tempG = current.g + 1.4;
         } else {
           tempG = current.g + 1;
         }
+
         tempH = distance(neighbour, end);
         tempF = tempG + tempH;
-        let visited = false;
+
+        let visited = false; // 当前相邻点是否已经访问过
 
         if (visitedNodes[neighbour.col * 100 + neighbour.row]) {
           neighbour = visitedNodes[neighbour.col * 100 + neighbour.row];
           visited = true;
         }
         if (tempF < neighbour.f || !visited) {
+          // 如果为经过此点为最优路径或未访问则添加
           await sleep(1);
           container.children[
             100 * neighbour.col + neighbour.row
@@ -301,6 +308,8 @@
           heap.push(neighbour);
         }
       }
+
+      // 获取相邻点坐标
       function getNeighbours({ row, col }) {
         return [
           [row - 1, col],
@@ -318,9 +327,11 @@
           setTimeout(resolve, duration);
         });
       }
+      // 计算到终点距离
       function distance(point) {
         return (point.row - end[0]) ** 2 + (point.col - end[1]) ** 2;
       }
+      // 比较两点到终点距离
       function compare(p1, p2) {
         return distance(p1) - distance(p2);
       }
