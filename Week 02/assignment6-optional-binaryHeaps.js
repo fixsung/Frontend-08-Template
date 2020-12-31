@@ -2,7 +2,7 @@
  * @Author: songyzh
  * @Date: 2020-12-30 10:16:43
  * @LastEditors: songyzh
- * @LastEditTime: 2020-12-30 13:55:41
+ * @LastEditTime: 2020-12-30 17:03:47
  */
 const GETPARENT = Symbol("get parent");
 const GETLEFTCHILD = Symbol("get left child");
@@ -109,3 +109,5 @@ console.log(heap);
 root = heap.pop();
 console.log(root);
 console.log(heap);
+
+console.log("%c oops! no path to end!", "color: red;");
