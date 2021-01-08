@@ -1,0 +1,218 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2021-01-08 10:05:21
+ * @LastEditors: songyzh
+ * @LastEditTime: 2021-01-08 15:09:33
+ * @Desc: 增加四则运算括号的支持
+-->
+
+<script>
+  // tokenizing
+  let tokens = [];
+  const regexp = /(-?[0-9\.]+)|([\s]+)|([\r\n]+)|(\+)|(\-)|(\*)|(\/)|(\()|(\))/g;
+  const dictionary = [
+    "Number",
+    "WhiteSpace",
+    "LineTerminator",
+    "+",
+    "-",
+    "*",
+    "/",
+    "(",
+    ")",
+  ];
+  function* tokenize(tokens) {
+    let result = null;
+    let lastIndex = 0;
+    while (true) {
+      lastIndex = regexp.lastIndex;
+      result = regexp.exec(tokens);
+
+      if (!result) {
+        break;
+      }
+      // has other char
+      if (regexp.lastIndex - lastIndex > result[0].length) {
+        break;
+      }
+
+      let token = { type: null, value: null };
+
+      for (let i = 1; i <= dictionary.length; i++) {
+        if (result[i]) {
+          token.type = dictionary[i - 1];
+        }
+      }
+      token.value = result[0];
+
+      yield token;
+    }
+    yield { type: "EOF" };
+  }
+
+  for (let token of tokenize("1024 * (2 + 256)")) {
+    if (token.type !== "WhiteSpace" && token.type !== "LineTerminator") {
+      tokens.push(token);
+    }
+  }
+</script>
+<script>
+  // 加法判定
+  const isAddExpr = (tokens) => {
+    return (
+      tokens[0].type === "AdditiveExpression" &&
+      tokens[1] &&
+      tokens[1].type === "+"
+    );
+  };
+  // 减法判定
+  const isSubExpr = (tokens) => {
+    return (
+      tokens[0].type === "AdditiveExpression" &&
+      tokens[1] &&
+      tokens[1].type === "-"
+    );
+  };
+  // 乘法判定
+  const isMulExpr = (tokens) => {
+    return (
+      tokens[0].type === "MultiplicativeExpression" &&
+      tokens[1] &&
+      tokens[1].type === "*"
+    );
+  };
+  // 除法判定
+  const isDevExpr = (tokens) => {
+    return (
+      tokens[0].type === "MultiplicativeExpression" &&
+      tokens[1] &&
+      tokens[1].type === "/"
+    );
+  };
+  // parsing
+  class Parser {
+    constructor() {
+      this.index = 0;
+    }
+    parsing(tokens) {
+      this.tokens = tokens;
+      return this.expression();
+    }
+    expression() {
+      if (this.tokens[0].type === "AdditiveExpression") {
+        let node = {
+          type: "Expression",
+          children: [this.tokens.shift(), this.tokens.shift()],
+        };
+        this.tokens.unshift(node);
+        return this.tokens[0];
+      }
+      this.additiveExpression();
+      return this.expression();
+    }
+    additiveExpression() {
+      if (this.tokens[0].type === "MultiplicativeExpression") {
+        let node = {
+          type: "AdditiveExpression",
+          children: [this.tokens[0]],
+        };
+        this.tokens[0] = node;
+        return this.additiveExpression();
+      }
+      if (isAddExpr(this.tokens)) {
+        let node = {
+          type: "AdditiveExpression",
+          operator: "+",
+          children: [],
+        };
+        node.children.push(this.tokens.shift());
+        node.children.push(this.tokens.shift());
+        this.multiplicativeExpression(this.tokens);
+        node.children.push(this.tokens.shift());
+        this.tokens.unshift(node);
+        return this.additiveExpression();
+      }
+      if (isSubExpr(this.tokens)) {
+        let node = {
+          type: "AdditiveExpression",
+          operator: "-",
+          children: [],
+        };
+        node.children.push(this.tokens.shift());
+        node.children.push(this.tokens.shift());
+        multiplicativeExpression(this.tokens);
+        node.children.push(this.tokens.shift());
+        this.tokens.unshift(node);
+        return this.additiveExpression();
+      }
+      if (this.tokens[0].type === "AdditiveExpression") {
+        return this.tokens[0];
+      }
+      this.multiplicativeExpression();
+      return this.additiveExpression();
+    }
+    multiplicativeExpression() {
+      if (
+        this.tokens[0].type === "Number" ||
+        this.tokens[0].type === "BracketsExpression"
+      ) {
+        let node = {
+          type: "MultiplicativeExpression",
+          children: [this.tokens[0]],
+        };
+        this.tokens[0] = node;
+        return this.multiplicativeExpression();
+      }
+      if (isMulExpr(this.tokens)) {
+        let node = {
+          type: "MultiplicativeExpression",
+          operator: "*",
+          children: [],
+        };
+        node.children.push(this.tokens.shift());
+        node.children.push(this.tokens.shift());
+        this.bracketsExpression();
+        node.children.push(this.tokens.shift());
+        this.tokens.unshift(node);
+        return this.multiplicativeExpression();
+      }
+      if (isDevExpr(this.tokens)) {
+        let node = {
+          type: "MultiplicativeExpression",
+          operator: "/",
+          children: [],
+        };
+        node.children.push(this.tokens.shift());
+        node.children.push(this.tokens.shift());
+        this.bracketsExpression();
+        node.children.push(this.tokens.shift());
+        this.tokens.unshift(node);
+        return this.multiplicativeExpression();
+      }
+      if (this.tokens[0].type === "MultiplicativeExpression") {
+        return this.tokens[0];
+      }
+      this.bracketsExpression();
+      return this.multiplicativeExpression();
+    }
+    bracketsExpression() {
+      if (this.tokens[0].type === "(") {
+        this.tokens.shift();
+        let node = this.expression();
+        let nextToken = node.children.pop();
+        if (nextToken.type != ")") {
+          throw new Error("not found )");
+        }
+        node.type = "BracketsExpression";
+        this.tokens[0] = node;
+        return this.bracketsExpression();
+      }
+      if (this.tokens[0].type === "BracketsExpression") {
+        return this.tokens[0];
+      }
+    }
+  }
+
+  let parser = new Parser();
+  console.log(parser.parsing(tokens));
+</script>
