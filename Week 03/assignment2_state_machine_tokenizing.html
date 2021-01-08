@@ -1,0 +1,55 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2021-01-07 15:31:40
+ * @LastEditors: songyzh
+ * @LastEditTime: 2021-01-07 17:11:35
+-->
+<script>
+  // State Machine
+
+  let token = [];
+  let tokens = [];
+  let numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."];
+  let operators = ["+", "-", "*", "/"];
+  const start = (char) => {
+    if (numbers.includes(char)) {
+      token.push(char);
+      return inNumber;
+    }
+    if (operators.includes(char)) {
+      emmitToken(char, char);
+      return start;
+    }
+    if (char === " ") {
+      return start;
+    }
+    if (char === "\r" || char === "\n") {
+      return start;
+    }
+    emmitToken("EOF", "EOF");
+  };
+  const inNumber = (char) => {
+    if (numbers.includes(char)) {
+      token.push(char);
+      return inNumber;
+    } else {
+      emmitToken("Number", token.join(""));
+      token = [];
+      return start(char); // put back char
+    }
+  };
+
+  const emmitToken = (type, value) => {
+    tokens.push({ type, value });
+  };
+  const tokenize = (source) => {
+    let state = start;
+    for (var c of source.split("")) {
+      state = state(c);
+    }
+    state(Symbol("EOF"));
+  };
+
+  tokenize("10*25/2");
+  console.log(tokens);
+</script>

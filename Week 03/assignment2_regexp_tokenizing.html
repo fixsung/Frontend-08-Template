@@ -1,0 +1,54 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2021-01-07 14:48:53
+ * @LastEditors: songyzh
+ * @LastEditTime: 2021-01-07 16:58:35
+-->
+<script>
+  // regexp
+  let source = [];
+  const regexp = /(-?[0-9\.]+)|([\s]+)|([\r\n]+)|(\+)|(\-)|(\*)|(\/)/g;
+  const dictionary = [
+    "Number",
+    "WhiteSpace",
+    "LineTerminator",
+    "+",
+    "-",
+    "*",
+    "/",
+  ];
+  function* tokenize(source) {
+    let result = null;
+    let lastIndex = 0;
+    while (true) {
+      lastIndex = regexp.lastIndex;
+      result = regexp.exec(source);
+
+      if (!result) {
+        break;
+      }
+      // has other char
+      if (regexp.lastIndex - lastIndex > result[0].length) {
+        break;
+      }
+
+      let token = { type: null, value: null };
+
+      for (let i = 1; i <= dictionary.length; i++) {
+        if (result[i]) {
+          token.type = dictionary[i - 1];
+        }
+      }
+      token.value = result[0];
+
+      yield token;
+    }
+    yield { type: "EOF" };
+  }
+
+  for (let token of tokenize("1024 + 2 * 256")) {
+    if (token.type !== "WhiteSpace" && token.type !== "LineTerminator") {
+      source.push(token);
+    }
+  }
+</script>
