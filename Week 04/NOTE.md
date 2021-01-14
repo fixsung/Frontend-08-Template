@@ -2,7 +2,7 @@
  * @Author: songyzh
  * @Date: 2020-12-21 15:35:43
  * @LastEditors: songyzh
- * @LastEditTime: 2021-01-14 17:04:19
+ * @LastEditTime: 2021-01-14 17:20:05
 -->
 
 # 学习笔记
@@ -63,19 +63,19 @@ Trie 树包含以下特征：
 
 通过上面的分析可以知道，如果找到了模式串中不匹配的字符就可以在这个字符前面找**最长可匹配后缀子串**和**最长可匹配前缀子串**,然后让前缀移动到后缀位置。继续下一轮比较。
 
-![KMP](./assets/kmp2.gif)。
+![KMP](./assets/kmp2.gif)
 
-所以`KMP算法`关键点在于找到**最长可匹配后缀子串**和**最长可匹配前缀子串**
+所以`KMP算法`关键点在于找到**最长可匹配后缀子串**和**最长可匹配前缀子串** 。
 
-![KMP](./assets/kmp3.gif)。
+![KMP](./assets/kmp3.gif)
 
-然后移动，使得公共前缀移动到后缀的位置,然后继续比较
+然后移动，使得公共前缀移动到后缀的位置,然后继续比较。
 
 ![KMP](./assets/kmp4.gif)
 
 ![KMP](./assets/kmp5.gif)
 
-最终完成匹配
+最终完成匹配。
 
 ### next 数组
 
@@ -101,7 +101,7 @@ Trie 树包含以下特征：
 按这个方法计算最终可以得到 next 数组，即如果此时模式串走到"A<span style="color:red">B</span>CDABD"中的 B 那么前面只有字母 A 则根据上面的分析在 B 处填入 0,同理如果走到"ABCDA<span style="color:red">B</span>D"那么前面字符串为"ABCDA"那么根据上面分析则此处填入 1,由此得到 next 数组
 最终生成 next 数组`[0,0,0,0,0,1,2]`
 
-## 整体逻辑
+### 整体逻辑
 
 - 对模式串预处理，生成 next 数组
 
@@ -109,6 +109,14 @@ Trie 树包含以下特征：
   - 比较主串和模式串的字符
   - 如果发现坏字符，查询 next 数组，得到匹配前缀所对应的最长可匹配前缀子串，移动模式串到对应位置
   - 如果当前字符匹配，继续循环
+
+## WildCard
+
+![rules](./assets/rules.png)
+
+![observations](./assets/observations.png)
+
+![methodoverview](./assets/methodoverview.png)
 
 ## 查缺补漏
 
