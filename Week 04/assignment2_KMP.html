@@ -1,0 +1,53 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2021-01-13 15:07:19
+ * @LastEditors: songyzh
+ * @LastEditTime: 2021-01-13 17:57:19
+-->
+<script>
+  /**
+   * @see https://blog.csdn.net/bjweimengshu/article/details/104528964/
+   * @param {string} pattern
+   * @return {number[]}
+   */
+  const generateNext = (pattern) => {
+    let next = new Array(pattern.length).fill(0);
+    let j = 0;
+    for (let i = 2; i < pattern.length; i++) {
+      while (j !== 0 && pattern[j] !== pattern[i - 1]) {
+        //从next[i+1]的求解回溯到 next[j]
+        j = next[j];
+      }
+      if (pattern[j] == pattern[i - 1]) {
+        j++;
+      }
+      next[i] = j;
+    }
+    return next;
+  };
+  /**
+   * @param {string} text
+   * @param {string} pattern
+   * @return {number}
+   */
+  const kmp = (text, pattern) => {
+    let next = generateNext(pattern);
+    let j = 0;
+    //主循环，遍历主串字符
+    for (let i = 0; i < text.length; i++) {
+      while (j > 0 && text[i] != pattern[j]) {
+        //遇到坏字符时，查询next数组并改变模式串的起点
+        j = next[j];
+      }
+      if (text[i] == pattern[j]) {
+        j++;
+      }
+      if (j == pattern.length) {
+        //匹配成功，返回下标
+        return i - pattern.length + 1;
+      }
+    }
+    return -1;
+  };
+  console.log(kmp("terddsreabcdabcettr", "abcdabce"));
+</script>

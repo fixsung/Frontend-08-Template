@@ -1,0 +1,97 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2021-01-11 14:37:08
+ * @LastEditors: songyzh
+ * @LastEditTime: 2021-01-11 15:39:44
+-->
+<script>
+  class Trie {
+    constructor() {
+      this.flag = Symbol("terminal"); // 终止符
+      this.root = Object.create(null);
+    }
+    insert(word) {
+      let node = this.root;
+      for (let char of word) {
+        if (!node[char]) {
+          node[char] = Object.create(null);
+        }
+        node = node[char];
+      }
+      if (!(this.flag in node)) {
+        node[this.flag] = 0;
+      }
+      node[this.flag]++;
+    }
+    search(word) {
+      let result = [];
+      let node = this.root;
+      for (let char of word) {
+        if (node[char]) {
+          node = node[char];
+        } else {
+          return null;
+        }
+      }
+      if (node[this.flag]) {
+        return node[this.flag];
+      }
+      return null;
+    }
+    most() {
+      let max = 0;
+      let maxWord = null;
+      let visit = (node, word) => {
+        if (node[this.flag] && node[this.flag] > max) {
+          max = node[this.flag];
+          maxWord = word;
+        }
+        for (let p in node) {
+          visit(node[p], word + p);
+        }
+      };
+      visit(this.root, "");
+      console.log(maxWord, max);
+    }
+    startWith(word) {
+      let result = [];
+      let node = this.root;
+      for (let char of word) {
+        if (node[char]) {
+          node = node[char];
+        } else {
+          return result;
+        }
+      }
+      let visit = (node, word) => {
+        if (node[this.flag]) {
+          result.push({
+            value: word,
+            count: node[this.flag],
+          });
+        }
+        for (let p in node) {
+          visit(node[p], word + p);
+        }
+      };
+      visit(node, word);
+      return result;
+    }
+  }
+
+  const generateRandomWord = (length) => {
+    let string = "";
+    for (let i = 0; i < length; i++) {
+      string += String.fromCharCode(Math.random() * 26 + "a".charCodeAt(0));
+    }
+    return string;
+  };
+
+  let trieTree = new Trie();
+
+  for (let i = 0; i < 100; i++) {
+    trieTree.insert(generateRandomWord(4));
+  }
+
+  console.log(trieTree);
+</script>
