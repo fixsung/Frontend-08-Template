@@ -2,7 +2,7 @@
  * @Author: songyzh
  * @Date: 2021-01-08 10:05:21
  * @LastEditors: songyzh
- * @LastEditTime: 2021-01-08 15:09:33
+ * @LastEditTime: 2021-01-08 15:56:46
  * @Desc: 增加四则运算括号的支持
 -->
 
@@ -50,7 +50,7 @@
     yield { type: "EOF" };
   }
 
-  for (let token of tokenize("1024 * (2 + 256)")) {
+  for (let token of tokenize("2*3")) {
     if (token.type !== "WhiteSpace" && token.type !== "LineTerminator") {
       tokens.push(token);
     }

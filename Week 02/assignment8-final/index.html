@@ -1,0 +1,43 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2021-01-04 16:10:06
+ * @LastEditors: songyzh
+ * @LastEditTime: 2021-01-06 14:35:10
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A* Path Finding</title>
+    <style>
+      body {
+        padding: 0px;
+        margin: 0px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="draw_area"></div>
+    <div id="oper_panel">
+      <button id="button1" class="control_button">Start Search</button>
+      <button id="button2" class="control_button">Pause Search</button>
+      <button id="button3" class="control_button">Clear Walls</button>
+    </div>
+    <div id="stats"></div>
+    <script src="./lib/raphael.min.js"></script>
+    <script src="./lib/state-machine.min.js"></script>
+    <script src="./js/View.js"></script>
+    <script src="./js/BinaryHeap.js"></script>
+    <script src="./js/PathFinder.js"></script>
+    <script src="./js/Controller.js"></script>
+    <script>
+      let view = new View(48, 18);
+      view.generateGrid().then(() => {
+        let controller = new Controller(view);
+        controller.init();
+      });
+    </script>
+  </body>
+</html>

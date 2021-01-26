@@ -1,0 +1,73 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2021-01-21 13:57:38
+ * @LastEditors: songyzh
+ * @LastEditTime: 2021-01-21 16:01:40
+-->
+<div id="container" style="overflow-wrap: break-word">
+  FIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIX
+</div>
+<div
+  id="dragable"
+  style="
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    background-color: rgb(247, 95, 8);
+  "
+></div>
+<script>
+  let dragable = document.getElementById("dragable");
+  let baseX = 0;
+  let baseY = 0;
+  dragable.addEventListener("mousedown", (event) => {
+    let startX = event.clientX;
+    let startY = event.clientY;
+
+    let up = (event) => {
+      baseX = baseX + event.clientX - startX;
+      baseY = baseY + event.clientY - startY;
+
+      document.removeEventListener("mouseup", up);
+      document.removeEventListener("mousemove", move);
+    };
+    let move = (event) => {
+      //   dragable.style.transform = `translate(${
+      //     baseX + event.clientX - startX
+      //   }px,${baseY + event.clientY - startY}px)`;
+      let range = nearest(event.clientX, event.clientY);
+      range.insertNode(dragable);
+    };
+
+    document.addEventListener("mouseup", up);
+    document.addEventListener("mousemove", move);
+  });
+
+  let ranges = [];
+  let container = document.getElementById("container");
+  for (let i = 0; i < container.childNodes[0].textContent.length; i++) {
+    let range = document.createRange();
+    range.setStart(container.childNodes[0], i);
+    range.setEnd(container.childNodes[0], i);
+    console.log(range.getBoundingClientRect());
+    ranges.push(range);
+  }
+
+  function nearest(x0, y0) {
+    let nearestRange = null;
+    let distance = Infinity;
+    for (let range of ranges) {
+      let rect = range.getBoundingClientRect();
+      let { x, y } = rect;
+      let d = (x - x0) ** 2 + (y - y0) ** 2;
+      if (d < distance) {
+        nearestRange = range;
+        distance = d;
+      }
+    }
+    return nearestRange;
+  }
+  document.addEventListener("selectstart", (event) => {
+    event.preventDefault();
+  });
+</script>

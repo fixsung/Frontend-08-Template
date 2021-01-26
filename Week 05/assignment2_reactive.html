@@ -1,0 +1,66 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2021-01-21 10:42:19
+ * @LastEditors: songyzh
+ * @LastEditTime: 2021-01-21 13:27:36
+-->
+<script>
+  let objct = { a: 1, b: 2, c: { d: 3 } };
+  let reactives = new Map();
+  let callbacks = new Map();
+  let usedReactives = [];
+
+  let proxy = reactive(objct);
+
+  effect(() => {
+    console.log(proxy.c.d);
+  });
+
+  function effect(callback) {
+    // callbacks.push(callback);
+    usedReactives = [];
+    callback();
+    for (let reactivity of usedReactives) {
+      if (!callbacks.has(reactivity[0])) {
+        callbacks.set(reactivity[0], new Map());
+      }
+      if (!callbacks.get(reactivity[0]).has(reactivity[1])) {
+        callbacks.get(reactivity[0]).set(reactivity[1], []);
+      }
+      callbacks.get(reactivity[0]).get(reactivity[1]).push(callback);
+    }
+  }
+
+  function reactive(target) {
+    if (reactives.has(target)) {
+      return reactives.get(target);
+    }
+    let proxy = new Proxy(target, {
+      get(target, propKey, receiver) {
+        console.log("[proxy get]", target, propKey, receiver);
+
+        if (typeof Reflect.get(target, propKey, receiver) == "object") {
+          return reactive(Reflect.get(target, propKey, receiver)); // return Proxy
+        }
+        usedReactives.push([target, propKey]);
+        return Reflect.get(target, propKey, receiver);
+      },
+      set(target, propKey, value, receiver) {
+        console.log("[proxy set]", target, propKey, receiver);
+        let result = Reflect.set(target, propKey, value, receiver);
+        if (result) {
+          if (callbacks.get(target) && callbacks.get(target).get(propKey)) {
+            for (let callback of callbacks.get(target).get(propKey)) {
+              callback();
+            }
+          }
+          return true;
+        }
+
+        return false;
+      },
+    });
+
+    reactives.set(target, proxy);
+  }
+</script>

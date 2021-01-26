@@ -1,0 +1,18 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2021-01-21 10:23:34
+ * @LastEditors: songyzh
+ * @LastEditTime: 2021-01-21 10:39:58
+-->
+<script>
+  let object = {
+    a: 1,
+    b: 2,
+  };
+
+  let proxy = new Proxy(object, {
+    set(target, propKey, value) {
+      console.log(target, propKey, value);
+    },
+  });
+</script>
