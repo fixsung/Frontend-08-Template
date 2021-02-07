@@ -1,0 +1,194 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2021-02-07 22:50:06
+ * @LastEditors: songyzh
+ * @LastEditTime: 2021-02-07 23:14:54
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="main" style="width: 1200px; height: 2400px"></div>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.2/dist/echarts.min.js"></script>
+    <script>
+      function getAllRealmObjects() {
+        const objects = [
+          "eval",
+          "isFinite",
+          "isNaN",
+          "parseFloat",
+          "parseInt",
+          "decodeURI",
+          "decodeURIComponent",
+          "encodeURI",
+          "encodeURIComponent",
+          "Array",
+          "Date",
+          "RegExp",
+          "Promise",
+          "Proxy",
+          "Map",
+          "WeakMap",
+          "Set",
+          "WeakSet",
+          "Function",
+          "Boolean",
+          "String",
+          "Number",
+          "Symbol",
+          "Object",
+          "Error",
+          "EvalError",
+          "RangeError",
+          "ReferenceError",
+          "SyntaxError",
+          "TypeError",
+          "URIError",
+          "ArrayBuffer",
+          "SharedArrayBuffer",
+          "DataView",
+          "Float32Array",
+          "Float64Array",
+          "Int8Array",
+          "Int16Array",
+          "Int32Array",
+          "Uint8Array",
+          "Uint16Array",
+          "Uint32Array",
+          "Uint8ClampedArray",
+          "Atomics",
+          "JSON",
+          "Math",
+          "Reflect",
+        ];
+
+        const set = new Set();
+
+        const globalObject = {
+          id: "Global Object",
+          name: "Global Object",
+          children: [],
+        };
+
+        for (let i of objects) {
+          globalObject.children.push({
+            children: [],
+            id: i,
+            name: i,
+          });
+        }
+
+        for (let i = 0; i < objects.length; i++) {
+          const current = objects[i];
+          if (set.has(objects[i])) continue;
+          set.add(objects[i]);
+          for (let p of Object.getOwnPropertyNames(window[current])) {
+            let d = Object.getOwnPropertyDescriptor(window[current], p);
+            if (
+              d.hasOwnProperty("value") &&
+              ((d.value !== null && typeof d.value === "object") ||
+                typeof d.value === "function") &&
+              d.value instanceof Object
+            ) {
+              let childrenThird = [];
+              for (let k of Object.getOwnPropertyNames(d.value)) {
+                if (k !== "name" && k !== "length") {
+                  childrenThird.push({ id: k, name: k });
+                }
+              }
+              globalObject["children"][i].children.push({
+                children: childrenThird,
+                id: p,
+                name: p,
+              });
+            }
+            if (d.hasOwnProperty("get") && typeof d.get === "function") {
+              let childrenThird = [];
+              for (let k of Object.getOwnPropertyNames(d.get)) {
+                if (k !== "name" && k !== "length") {
+                  childrenThird.push({ id: k, name: k });
+                }
+              }
+              globalObject["children"][i].children.push({
+                children: childrenThird,
+                id: p,
+                name: p,
+              });
+            }
+            if (d.hasOwnProperty("set") && typeof d.set === "function") {
+              let childrenThird = [];
+              for (let k of Object.getOwnPropertyNames(d.set)) {
+                if (k !== "name" && k !== "length") {
+                  childrenThird.push({ id: k, name: k });
+                }
+              }
+              globalObject["children"][i].children.push({
+                children: childrenThird,
+                id: p,
+                name: p,
+              });
+            }
+          }
+        }
+        return globalObject;
+      }
+      let data = getAllRealmObjects();
+      var chartDom = document.getElementById("main");
+      var myChart = echarts.init(chartDom);
+      var option;
+
+      myChart.showLoading();
+      myChart.setOption(
+        (option = {
+          tooltip: {
+            trigger: "item",
+            triggerOn: "mousemove",
+          },
+          series: [
+            {
+              type: "tree",
+
+              data: [data],
+
+              top: "1%",
+              left: "7%",
+              bottom: "1%",
+              right: "20%",
+
+              symbolSize: 7,
+
+              label: {
+                position: "left",
+                verticalAlign: "middle",
+                align: "right",
+                fontSize: 9,
+              },
+
+              leaves: {
+                label: {
+                  position: "right",
+                  verticalAlign: "middle",
+                  align: "left",
+                },
+              },
+
+              emphasis: {
+                focus: "descendant",
+              },
+
+              expandAndCollapse: true,
+              animationDuration: 550,
+              animationDurationUpdate: 750,
+            },
+          ],
+        })
+      );
+
+      myChart.hideLoading();
+    </script>
+  </body>
+</html>
