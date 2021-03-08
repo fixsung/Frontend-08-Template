@@ -2,12 +2,10 @@
  * @Author: songyzh
  * @Date: 2021-03-01 14:06:12
  * @LastEditors: songyzh
- * @LastEditTime: 2021-03-08 14:29:29
+ * @LastEditTime: 2021-03-03 15:25:39
  */
 const net = require("net");
 const parser = require("./parser");
-const images = require("images");
-const render = require("./render");
 class Request {
   constructor(options) {
     this.method = options.method || "GET";
@@ -220,8 +218,4 @@ class TrunkedBodyParser {
   });
   let response = await request.send();
   let dom = parser.parseHTML(response.body);
-
-  let viewport = images(800, 600);
-  render(viewport, dom.children[0].children[2].children[1].children[1]);
-  viewport.save("viewport.jpg");
 })();

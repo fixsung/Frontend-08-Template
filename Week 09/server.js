@@ -2,7 +2,7 @@
  * @Author: songyzh
  * @Date: 2021-03-01 13:56:42
  * @LastEditors: songyzh
- * @LastEditTime: 2021-03-08 14:00:56
+ * @LastEditTime: 2021-03-03 15:05:58
  */
 const http = require("http");
 
@@ -21,29 +21,21 @@ http
         body = body.join("");
         console.log("body:", body);
         response.writeHead(200, { "Content-Type": "text/html" });
-        response.end(`<html lang="en"><head><style> 
-#container {
-width: 500px;
-height: 300px;
-background-color: #fff000;
-display:flex;
-background-color:rgb(255,255,255)
-}
-#container #myid {
-width: 200px;
+        response.end(`<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Document</title><style>#img {
+width: 100px;
 height: 100px;
-background-color: rgb(255,0,0);
+background-color: #fff000;}
+img {
+width: 100px;
+height: 100px;
+background-color: #fff000;
 }
-#container .cl {
-  flex:1;
-  background-color: rgb(0,255,0);
-  }
 </style>
 </head>
 <body>
-<div id="container">
-<div id="myid"></div>
-<div class="cl"></div>
+<div>
+<img id="img" src="xxx" />
+<img />
 </div>
 </body>
 </html>`);

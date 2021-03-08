@@ -2,7 +2,7 @@
  * @Author: songyzh
  * @Date: 2021-03-04 15:12:44
  * @LastEditors: songyzh
- * @LastEditTime: 2021-03-05 17:10:19
+ * @LastEditTime: 2021-03-08 14:07:49
  */
 function layout(element) {
   if (!element.computedStyle) {
@@ -254,7 +254,7 @@ function layout(element) {
     }
   } else {
     crossSpace = style[crossSize];
-    for (let i = 0; i < flexLines.length; I++) {
+    for (let i = 0; i < flexLines.length; i++) {
       crossSpace -= flexLines[i].crossSpace;
     }
   }
@@ -302,7 +302,7 @@ function layout(element) {
     let lineCrossSize =
       style.alignContent === "stretch"
         ? items.crossSpace + crossSpace / flexLines.length
-        : item.crossSpace;
+        : items.crossSpace;
 
     for (let i = 0; i < items.length; i++) {
       let item = items[i];
@@ -310,7 +310,7 @@ function layout(element) {
       let align = itemStyle.alignSelf || style.alignItems;
 
       if (itemStyle[crossSize] == null) {
-        itemStyle[corssSize] = align === "stretch" ? lineCrossSize : 0;
+        itemStyle[crossSize] = align === "stretch" ? lineCrossSize : 0;
       }
 
       if (align === "flex-start") {

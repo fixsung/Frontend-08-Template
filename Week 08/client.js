@@ -2,7 +2,7 @@
  * @Author: songyzh
  * @Date: 2021-03-01 14:06:12
  * @LastEditors: songyzh
- * @LastEditTime: 2021-03-02 16:38:03
+ * @LastEditTime: 2021-03-03 13:26:59
  */
 const net = require("net");
 class Request {
@@ -71,7 +71,6 @@ ${Object.keys(this.headers)
 ${this.bodyText}`;
   }
 }
-
 class ResponseParser {
   constructor() {
     this.WAITING_STATUS_LINE = 0;
