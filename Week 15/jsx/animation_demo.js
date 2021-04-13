@@ -2,12 +2,13 @@
  * @Author: songyzh
  * @Date: 2021-04-12 14:55:46
  * @LastEditors: songyzh
- * @LastEditTime: 2021-04-12 15:54:37
+ * @LastEditTime: 2021-04-12 17:31:44
  * @Description:
  */
 import { Timeline, Animation } from "./animation.js";
 import { ease } from "./ease";
 let element = document.getElementById("ele");
+
 let timeline = new Timeline();
 let animation = new Animation(
   element.style,
