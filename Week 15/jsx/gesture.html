@@ -1,0 +1,16 @@
+<!--
+ * @Author: songyzh
+ * @Date: 2021-04-13 14:59:12
+ * @LastEditors: songyzh
+ * @LastEditTime: 2021-04-14 09:44:04
+ * @Description: 
+-->
+<body oncontextmenu="event.preventDefault()"></body>
+
+<script type="module">
+  import { enableGesture } from "./gesture.js";
+  enableGesture(document.documentElement);
+  document.documentElement.addEventListener("tap", (event) => {
+    console.log("tap event trigger");
+  });
+</script>
